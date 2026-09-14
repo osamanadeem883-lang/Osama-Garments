@@ -1,0 +1,44 @@
+THE WHOLE SHOP IN ONE FILE
+==========================
+
+index.html in this folder is the entire website.
+
+  the layout, the styling, the code,
+  every product and every line of text,
+  and the four header photos, all inside it.
+
+Nothing else is needed. No images folder. No script.js.
+No style.css. Put this one file on your domain and the
+shop works.
+
+
+PUTTING IT ON A DOMAIN
+----------------------
+Whatever host you buy (Hostinger, Namecheap, cPanel, GitHub
+Pages - any of them), the job is the same:
+
+   upload index.html into the public folder
+   (usually called  public_html  or  htdocs  or the repo root)
+
+That is it. Your address then shows the shop.
+
+
+ABOUT THE ADMIN
+---------------
+admin.html still works the normal way, in the "Garments store"
+folder, with index.html there. Keep using it as you do now.
+
+When you publish from the admin it writes store-data.js.
+If you ever drop that store-data.js next to THIS one file,
+it takes over and your newer products and prices show. The
+header photos keep working either way.
+
+admin.html must NEVER go on the website. Anyone who finds
+the address can open it and change your prices.
+
+
+WHEN THINGS CHANGE
+------------------
+This file is a snapshot. If you change products or text in
+the admin, ask me and I will rebuild it, or just publish
+store-data.js next to it.

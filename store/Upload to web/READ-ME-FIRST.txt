@@ -1,0 +1,21 @@
+This folder is the public website.
+
+
+THE EASY WAY
+------------
+Open admin.html (one folder up), go to Website, and press
+"Put the whole website online". When it asks for a folder,
+pick THIS folder - the folder itself, not the files in it.
+
+Everything here goes up in one go, and your products and
+prices come from the admin as you last left them.
+
+
+THE OLD WAY
+-----------
+Drag everything in here onto github.com and the site updates.
+Full instructions: "HOW TO UPDATE THE WEBSITE.txt", one folder up.
+
+
+Never put admin.html on the website. The publish button leaves
+it out on purpose.

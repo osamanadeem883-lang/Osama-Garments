@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | Osama Garments</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Crect width='44' height='44' fill='%230E6FAE'/%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 18 L7.5 29.5 h29 z'/%3E%3Cpath d='M22 18 V14 a3.4 3.4 0 1 0 -3.4 -3.4'/%3E%3C/g%3E%3C/svg%3E">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="store-data.js"></script>
+
+<style>
+:root{
+  /* Graphite & Rust - matches the shop */
+  --black:#14212C; --cream:#EAF3FB; --gold:#0E6FAE; --rust-deep:#0A5686;
+  --gray:#5A6B79; --border:#DCE7F0; --bg:#F5F9FD;
+  /* the accent must lift on navy - this reads 8.6:1 there */
+  --gold-on-dark:#7CC4EE;
+  --ok:#2E7D52; --bad:#B3403F;
+  --ease:cubic-bezier(.2,.7,.3,1);
+}
+::selection{background:var(--gold);color:#fff}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--bg);color:var(--black);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--gold)}
+
+/* ---------- sign-in screen ---------- */
+#gate{position:fixed;inset:0;background:var(--black);display:grid;place-items:center;z-index:100;padding:24px}
+#gate .box{width:min(400px,100%);background:#fff;padding:38px 34px}
+#gate .codebox{color:var(--gold-on-dark)}
+#gate h1{font-size:19px;margin-bottom:6px}
+#gate p{color:var(--gray);font-size:12.5px;line-height:1.6;margin-bottom:22px}
+#gate input{width:100%;padding:13px;border:1px solid var(--border);outline:none;margin-bottom:12px}
+#gate input:focus{border-color:var(--gold)}
+#gate button{width:100%;padding:13px;background:var(--black);color:#fff;border:0}
+#gate .err{color:var(--bad);font-size:12.5px;margin-top:10px;min-height:16px}
+#gate .switch{margin-top:16px;font-size:12.5px;color:var(--gray);text-align:center}
+.bar .who{font-size:12px;color:#9a9a9a;margin-right:4px}
+.bar .who b{color:#fff;font-weight:600}
+.bar .who .role{color:var(--gold-on-dark)}
+.role-note{background:#fff;border:1px solid var(--border);border-left:3px solid var(--gold);padding:16px 18px;margin-bottom:20px;font-size:12.5px;line-height:1.7;color:#555}
+.role-note strong{color:var(--black)}
+.rolecard{display:grid;grid-template-columns:110px 1fr;gap:10px 16px;font-size:12.5px;line-height:1.6;margin-top:12px}
+.rolecard dt{font-weight:600}
+.rolecard dd{color:var(--gray)}
+#gate .link{background:none;border:0;color:var(--gold);text-decoration:underline;text-underline-offset:3px;font-size:12.5px;padding:0;width:auto}
+.codebox{background:var(--black);color:var(--gold-on-dark);font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:21px;letter-spacing:.09em;text-align:center;padding:20px 12px;margin:16px 0;word-break:break-all}
+.code-warn{background:#FFF6DA;border:1px solid #EEDCA4;color:#5c4a1d;padding:12px 14px;font-size:12.5px;line-height:1.6;margin-top:14px}
+
+/* ---------- shell ---------- */
+header.bar{background:var(--black);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.bar .mark{width:30px;height:23px;color:var(--gold-on-dark);flex:none}
+.bar h1{font-family:"Outfit",sans-serif;font-size:16px;font-weight:600;letter-spacing:.01em}
+.bar .sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-on-dark)}
+.bar .spacer{margin-left:auto}
+.bar button{background:transparent;border:1px solid #3a3a3a;color:#fff;padding:9px 14px;font-size:12.5px}
+.bar button:hover{border-color:var(--gold-on-dark);color:var(--gold-on-dark)}
+.bar button.primary{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.bar button.primary:hover{background:var(--rust-deep);border-color:var(--rust-deep);color:#fff}
+
+.warn{background:#FFF6DA;border-bottom:1px solid #EEDCA4;padding:11px 22px;font-size:12.5px;line-height:1.6;color:#5c4a1d;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.warn span{flex:1 1 340px}
+.warn button{flex:0 0 auto;background:transparent;border:1px solid #b9963c;color:#5c4a1d;
+  padding:7px 14px;font-size:12px;font-weight:600;transition:background .2s var(--ease),color .2s var(--ease)}
+.warn button:hover{background:#5c4a1d;border-color:#5c4a1d;color:#FFF6DA}
+
+nav.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 22px;display:flex;gap:2px;overflow-x:auto;position:sticky;top:53px;z-index:19}
+nav.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;padding:14px 16px;white-space:nowrap;color:var(--gray);transition:color .2s var(--ease)}
+nav.tabs button:hover{color:var(--black)}
+nav.tabs button.active{color:var(--black);border-bottom-color:var(--gold);font-weight:600}
+
+main{padding:26px 22px 90px;max-width:1180px;margin:0 auto}
+.panel{display:none}
+.panel.active{display:block}
+.panel > h2{font-family:"Outfit",sans-serif;font-size:19px;font-weight:600;letter-spacing:-.01em;margin-bottom:5px}
+.panel > .hint{color:var(--gray);font-size:12.5px;margin-bottom:20px;line-height:1.6}
+
+.card{background:#fff;border:1px solid var(--border);padding:22px;margin-bottom:18px}
+.card h3{font-family:"Outfit",sans-serif;font-size:15px;font-weight:600;margin-bottom:16px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+
+label{display:block;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--gray);margin-bottom:6px}
+/* every text-like input, password included - leaving password out of this
+   list left those fields at the browser's default narrow width */
+input[type=text],input[type=number],input[type=email],input[type=password],
+input[type=tel],input[type=url],input[type=search],textarea,select{
+  width:100%;padding:11px 12px;border:1px solid var(--border);background:#fff;outline:none;border-radius:0}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:84px;line-height:1.6}
+.field{margin-bottom:14px}
+.field .help{font-size:11.5px;color:var(--gray);margin-top:5px;line-height:1.5}
+
+.btn{padding:11px 18px;border:1px solid var(--black);background:var(--black);color:#fff;font-size:13px;font-weight:500;transition:.2s var(--ease)}
+.btn:active{transform:translateY(1px)}
+.btn:hover{background:var(--gold);border-color:var(--gold);color:#241d0f}
+.btn.ghost{background:transparent;color:var(--black)}
+.btn.ghost:hover{background:var(--black);color:#fff;border-color:var(--black)}
+.btn.danger{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn.danger:hover{background:var(--bad);color:#fff}
+.btn.small{padding:7px 11px;font-size:12px}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--gray);background:#F4F9FD;font-weight:600}
+tbody tr:hover{background:#F7FBFE}
+td.thumb{width:60px}
+td.thumb img{width:46px;height:58px;object-fit:cover;background:var(--cream);display:block}
+.tag{display:inline-block;font-size:10.5px;letter-spacing:.08em;padding:3px 7px;background:var(--cream);color:#5c4a1d}
+.muted{color:var(--gray);font-size:12.5px}
+
+.gh-log{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.85;
+  background:var(--paper);border:1px solid var(--border);padding:13px 15px;max-height:300px;overflow:auto}
+.gh-log div{white-space:pre-wrap;word-break:break-word}
+.gh-log .ok{color:#14713f}
+.gh-log .bad{color:var(--bad)}
+.gh-log .step{color:var(--gray)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.btn.primary:hover{background:var(--rust-deep);border-color:var(--rust-deep);color:#fff}
+a.btn{display:inline-block;text-decoration:none;line-height:normal}
+.right{text-align:right}
+.nowrap{white-space:nowrap}
+
+.empty{background:#fff;border:1px dashed var(--border);padding:46px 20px;text-align:center;color:var(--gray)}
+
+/* the global `* { margin:0 }` reset kills a dialog's automatic centring,
+   which pins every modal to the top-left corner - put it back */
+dialog{margin:auto;border:0;padding:0;width:min(720px,94vw);max-height:90vh;
+  background:#fff;box-shadow:0 24px 60px rgba(20,33,44,.3)}
+dialog#passwordDialog{width:min(560px,94vw)}
+dialog#userDialog{width:min(620px,94vw)}
+dialog::backdrop{background:rgba(20,33,44,.55)}
+.dlg-head{display:flex;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border)}
+.dlg-head h3{font-family:"Outfit",sans-serif;font-size:16px;font-weight:600}
+.dlg-head button{margin-left:auto;background:transparent;border:0;font-size:15px;color:var(--gray)}
+.dlg-body{padding:22px;max-height:66vh;overflow:auto}
+/* no trailing gap under the last row of a dialog */
+.dlg-body > .field:last-child{margin-bottom:0}
+.dlg-body > .grid2:last-of-type > .field{margin-bottom:0}
+.dlg-body > .grid2:has(+ .dlg-err) > .field{margin-bottom:0}
+/* an error line should take no room until there is an error in it */
+.dlg-err:empty{display:none}
+.dlg-err{margin-top:14px;color:var(--bad);font-size:12.5px;line-height:1.5}
+.dlg-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end}
+.preview{display:flex;gap:16px;align-items:flex-start;background:var(--cream);padding:14px;margin-bottom:18px}
+.preview img{width:96px;height:120px;object-fit:cover;background:#e6e1d8;flex:none}
+.preview .meta{font-size:12.5px;line-height:1.7}
+.preview .meta strong{display:block;font-size:14px;margin-bottom:3px}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--black);color:#fff;
+  padding:13px 22px;font-size:13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+
+.pill{display:inline-block;padding:3px 9px;font-size:11px;border:1px solid var(--border);background:#fff}
+.pill.New{border-color:var(--gold);color:#5c4a1d;background:#fdf8ee}
+.pill.Confirmed{border-color:#9ecab1;color:var(--ok);background:#f1f9f4}
+.pill.Delivered{border-color:#c9c9c9;color:var(--gray);background:#f6f6f6}
+.pill.Cancelled{border-color:#e3b3b2;color:var(--bad);background:#fdf3f3}
+</style>
+</head>
+<body>
+
+<!-- ============ sign in ============ -->
+<div id="gate">
+  <div class="box">
+
+    <form id="setupForm" hidden>
+      <h1>Create the owner account</h1>
+      <p>
+        This admin has not been set up on this computer yet. Make the main
+        account &mdash; it can change everything, including adding other people.
+      </p>
+      <input type="text" id="suName" placeholder="Your name" autocomplete="name">
+      <input type="text" id="suUser" placeholder="Username" autocomplete="username">
+      <input type="password" id="suPass" placeholder="Password (8 characters or more)" autocomplete="new-password">
+      <input type="password" id="suPass2" placeholder="Repeat password" autocomplete="new-password">
+      <button type="submit">Create account</button>
+      <div class="err" id="suError"></div>
+    </form>
+
+    <form id="loginForm" hidden>
+      <h1>Osama Garments admin</h1>
+      <p>
+        Accounts decide what each person can change in this admin, on this
+        computer. They are not website security &mdash; anyone who can open
+        these files can get past them.
+      </p>
+      <input type="text" id="liUser" placeholder="Username" autocomplete="username">
+      <input type="password" id="liPass" placeholder="Password" autocomplete="current-password">
+      <button type="submit">Sign in</button>
+      <div class="err" id="liError"></div>
+      <div class="switch">
+        <button type="button" class="link" id="forgotLink">Forgotten your password?</button>
+      </div>
+    </form>
+
+    <form id="recoverForm" hidden>
+      <h1>Reset your password</h1>
+      <p>
+        Enter the recovery code you were given when the account was made.
+        If you do not have it, an Owner can reset your password from the
+        Users tab instead.
+      </p>
+      <input type="text" id="rcUser" placeholder="Username" autocomplete="username">
+      <input type="text" id="rcCode" placeholder="Recovery code" autocomplete="off" spellcheck="false">
+      <input type="password" id="rcPass" placeholder="New password (8 characters or more)" autocomplete="new-password">
+      <input type="password" id="rcPass2" placeholder="Repeat new password" autocomplete="new-password">
+      <button type="submit">Reset password</button>
+      <div class="err" id="rcError"></div>
+      <div class="switch">
+        <button type="button" class="link" id="backToLogin">Back to sign in</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<!-- ============ shell ============ -->
+<header class="bar">
+  <svg class="mark" viewBox="0 0 44 34" fill="none" stroke="currentColor" stroke-width="1.6"
+       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M22 13.5 L5.5 27 h33 z"/><path d="M22 13.5 V10 a3.4 3.4 0 1 0 -3.4 -3.4"/>
+  </svg>
+  <div>
+    <h1 id="barBrand">Osama Garments</h1>
+    <div class="sub">Admin</div>
+  </div>
+  <div class="spacer"></div>
+  <span class="who" id="whoami"></span>
+  <button id="btnPassword">Change password</button>
+  <button id="btnSignOut">Sign out</button>
+  <button id="btnPreview">View shop</button>
+  <button id="btnBackup">Backup JSON</button>
+  <button id="btnRestore">Restore</button>
+  <button class="primary" id="btnPublish">Download store-data.js</button>
+</header>
+
+<div class="warn" id="dirtyWarn" hidden>
+  <span>
+    Unpublished changes. The shop on this computer updates as you type &mdash;
+    keep <em>index.html</em> open in another tab to watch it.
+    To put them on the public website, open the <strong>Website</strong> tab and press
+    <strong>Publish</strong>. (<strong>Download store-data.js</strong> still works if
+    you would rather move the file yourself.)
+  </span>
+  <button type="button" id="revertBtn">Undo all my changes</button>
+</div>
+
+<nav class="tabs">
+  <button data-tab="products" class="active">Products</button>
+  <button data-tab="categories">Categories</button>
+  <button data-tab="content">Site text</button>
+  <button data-tab="contact">Contact</button>
+  <button data-tab="orders">Orders</button>
+  <button data-tab="users">Users</button>
+  <button data-tab="website">Website</button>
+</nav>
+
+<main>
+
+  <!-- ============ products ============ -->
+  <section class="panel active" id="panel-products">
+    <h2>Products</h2>
+    <p class="hint">Everything the shop sells. Changes appear on the shop immediately on this computer; publish to make them live.</p>
+
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn" id="btnAddProduct">Add product</button>
+      <select id="filterCategory" style="width:auto"><option value="">All categories</option></select>
+      <input type="text" id="searchProducts" placeholder="Search products" style="width:220px">
+      <span class="muted" id="productCount"></span>
+    </div>
+
+    <div id="productsTableWrap"></div>
+  </section>
+
+  <!-- ============ categories ============ -->
+  <section class="panel" id="panel-categories">
+    <h2>Categories</h2>
+    <p class="hint">These drive the category tiles, the filter buttons and the footer links. Renaming one also renames it on every product that uses it.</p>
+
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn" id="btnAddCategory">Add category</button>
+    </div>
+
+    <div id="categoriesWrap"></div>
+  </section>
+
+  <!-- ============ site text ============ -->
+  <section class="panel" id="panel-content">
+    <h2>Site text</h2>
+    <p class="hint">Every piece of wording on the shop page, plus the two big photos.</p>
+    <div id="contentFields"></div>
+  </section>
+
+  <!-- ============ contact ============ -->
+  <section class="panel" id="panel-contact">
+    <h2>Contact &amp; brand</h2>
+    <p class="hint">Used in the footer and for sending orders to WhatsApp.</p>
+
+    <div class="card">
+      <h3>Brand</h3>
+      <div class="grid2">
+        <div class="field"><label>Shop name</label><input type="text" id="brandName"></div>
+        <div class="field"><label>Tagline under the name</label><input type="text" id="brandTagline"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contact</h3>
+      <div class="field">
+        <label>Email</label><input type="email" id="cEmail">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Phone as shown</label><input type="text" id="cPhoneDisplay">
+          <div class="help">e.g. 0314 4264131</div>
+        </div>
+        <div class="field">
+          <label>Phone for dialling</label><input type="text" id="cPhoneDial">
+          <div class="help">International form, e.g. +923144264131</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>WhatsApp number for orders</label><input type="text" id="cWhatsapp">
+        <div class="help">Digits only, country code first, no + and no zeros in front &mdash; e.g. 923144264131. Every order from the shop is sent to this number.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ orders ============ -->
+  <section class="panel" id="panel-orders">
+    <h2>Orders</h2>
+    <p class="hint">
+      <strong>Read this:</strong> a shop with no server cannot collect orders from your customers.
+      This list only shows orders placed in <em>this browser on this computer</em> &mdash; useful for
+      testing, not a record of your business. Your real orders arrive on WhatsApp.
+    </p>
+
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn ghost small" id="btnExportOrders">Export orders CSV</button>
+      <button class="btn danger small" id="btnClearOrders">Clear list</button>
+    </div>
+
+    <div id="ordersWrap"></div>
+  </section>
+
+  <!-- ============ users ============ -->
+  <section class="panel" id="panel-users">
+    <h2>Users</h2>
+    <p class="hint">Who can open this admin on this computer, and what each of them is allowed to change.</p>
+
+    <div class="role-note">
+      <strong>What these accounts actually do.</strong>
+      They control what each person sees and can change <em>inside this admin</em>,
+      so a staff member cannot accidentally rewrite your prices or your Our Story
+      page. That is worth having.
+      <br><br>
+      They are <strong>not</strong> website security. Anyone who can copy this
+      folder, or open <code>admin.html</code> in Notepad, can work around them.
+      Passwords are stored hashed, never as plain text, and never leave this
+      computer &mdash; but do not put <code>admin.html</code> on a public server,
+      and do not reuse a password here that you use anywhere else.
+
+      <dl class="rolecard">
+        <dt>Owner</dt><dd>Everything, including users, site text, contact details and backups.</dd>
+        <dt>Manager</dt><dd>Products, categories and orders. Cannot touch site text, contact details or users.</dd>
+        <dt>Staff</dt><dd>Orders only &mdash; view them and update their status. Can look at products but not change them.</dd>
+      </dl>
+    </div>
+
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn" id="btnAddUser">Add user</button>
+      <button class="btn ghost small" id="btnExportUsers">Export users</button>
+      <button class="btn ghost small" id="btnImportUsers">Import users</button>
+    </div>
+
+    <div id="usersWrap"></div>
+  </section>
+
+
+  <!-- ============ website ============ -->
+  <section class="panel" id="panel-website">
+    <h2>Website</h2>
+    <p class="hint">
+      Send your changes straight to the public website. No downloading, no GitHub &mdash;
+      press one button and the site updates itself in under a minute.
+    </p>
+
+    <div class="card">
+      <h3>Your website</h3>
+
+      <div class="grid2">
+        <div class="field">
+          <label>GitHub username</label><input type="text" id="ghOwner" placeholder="osamanadeem883-lang">
+        </div>
+        <div class="field">
+          <label>Repository name</label><input type="text" id="ghRepo" placeholder="osamagarments">
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Branch</label><input type="text" id="ghBranch" placeholder="main">
+          <div class="help">Almost always <b>main</b>. Leave it if you are not sure.</div>
+        </div>
+        <div class="field">
+          <label>Access token</label><input type="password" id="ghToken" placeholder="github_pat_...">
+          <div class="help">
+            Stored on this computer only, never in any file that goes online.
+            Make one at <b>github.com &rarr; Settings &rarr; Developer settings &rarr;
+            Personal access tokens &rarr; Fine-grained tokens</b>. Give it access to
+            this one repository, and set <b>Contents</b> to <b>Read and write</b>.
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="btnGhSave">Save</button>
+        <button class="btn ghost" id="btnGhTest">Test connection</button>
+        <button class="btn ghost small" id="btnGhForget">Forget token</button>
+        <span class="muted" id="ghWho"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Put the whole website online</h3>
+      <p class="help" style="margin-bottom:14px">
+        Use this the <b>first time</b>, and any time I send you new files.
+        Press Choose and pick your <b>&ldquo;Upload to web&rdquo;</b> folder &mdash; the whole
+        folder, not the files inside it. Everything in it goes up: index.html,
+        style.css, script.js and the photos, each in the right place.
+        <br><br>
+        Your products and prices are taken from this admin as you see them now,
+        not from the old store-data.js in the folder. admin.html is never sent,
+        whatever you pick.
+      </p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Your &ldquo;Upload to web&rdquo; folder</label>
+        <input type="file" id="ghSiteFolder" webkitdirectory directory multiple>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="btnGhPublishAll">Put the whole website online</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Publish your changes</h3>
+      <p class="help" style="margin-bottom:14px">
+        Day to day, once the website is up. Sends your products, prices and text &mdash;
+        the shop's own files stay as they are. The website takes about a minute
+        to catch up afterwards.
+      </p>
+      <div class="row">
+        <button class="btn primary" id="btnGhPublish">Publish to the website</button>
+        <a class="btn ghost small" id="ghVisit" target="_blank" rel="noopener">Open the website</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Photos and other files</h3>
+      <p class="help" style="margin-bottom:14px">
+        For product photos, or any file I send you. Pick the files, choose the folder
+        they belong in, and they go straight onto the website.
+      </p>
+      <div class="grid2">
+        <div class="field">
+          <label>Files</label><input type="file" id="ghFiles" multiple>
+        </div>
+        <div class="field">
+          <label>Folder on the website</label><input type="text" id="ghFolder" placeholder="images">
+          <div class="help">Leave empty to put them in the main folder, beside index.html.</div>
+        </div>
+      </div>
+      <button class="btn" id="btnGhUpload">Upload to the website</button>
+    </div>
+
+    <div class="card">
+      <h3>Check the website</h3>
+      <p class="help" style="margin-bottom:14px">
+        Looks at what is actually online: whether your photos are there, and whether
+        this admin page has been left where the public can open it.
+      </p>
+      <div class="row">
+        <button class="btn ghost" id="btnGhCheck">Check now</button>
+        <button class="btn danger" id="btnGhRemoveAdmin" hidden>Remove admin.html from the website</button>
+      </div>
+    </div>
+
+    <div class="card" id="ghLogCard" hidden>
+      <h3>What happened</h3>
+      <div id="ghLog" class="gh-log"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ product dialog ============ -->
+<dialog id="productDialog">
+  <form method="dialog" id="productForm">
+    <div class="dlg-head">
+      <h3 id="productDialogTitle">Add product</h3>
+      <button type="button" id="productDialogClose">&#10005;</button>
+    </div>
+
+    <div class="dlg-body">
+      <div class="preview">
+        <img id="pvImage" alt="">
+        <div class="meta">
+          <strong id="pvName">Product name</strong>
+          <span id="pvCategory" class="muted"></span><br>
+          <span id="pvPrice"></span>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field"><label>Name</label><input type="text" id="fName" required></div>
+        <div class="field"><label>Category</label><select id="fCategory"></select></div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Price (Rs.)</label><input type="number" id="fPrice" min="0" step="1" required>
+        </div>
+        <div class="field">
+          <label>Tag</label><input type="text" id="fTag" placeholder="BESTSELLER">
+          <div class="help">Small label on the photo. Leave blank for none.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Photo URL</label><input type="text" id="fImage">
+        <div class="help">Any direct image link. If it fails to load, the shop shows the hanger placeholder instead of a broken image.</div>
+      </div>
+
+      <div class="field"><label>Description</label><textarea id="fDescription"></textarea></div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Sizes</label><input type="text" id="fSizes" placeholder="S, M, L, XL">
+          <div class="help">Separate with commas.</div>
+        </div>
+        <div class="field">
+          <label>Colours</label><input type="text" id="fColors" placeholder="Black, White">
+          <div class="help">Separate with commas.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost" id="productCancel">Cancel</button>
+      <button type="submit" class="btn" id="productSave">Save product</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ category dialog ============ -->
+<dialog id="categoryDialog">
+  <form method="dialog" id="categoryForm">
+    <div class="dlg-head">
+      <h3 id="categoryDialogTitle">Add category</h3>
+      <button type="button" id="categoryDialogClose">&#10005;</button>
+    </div>
+
+    <div class="dlg-body">
+      <div class="preview">
+        <img id="cvImage" alt="">
+        <div class="meta"><strong id="cvName">Category</strong></div>
+      </div>
+
+      <div class="field"><label>Name</label><input type="text" id="fCatName" required></div>
+      <div class="field">
+        <label>Tile photo URL</label><input type="text" id="fCatImage">
+      </div>
+      <div class="field" id="renameNote" hidden>
+        <div class="help" id="renameNoteText"></div>
+      </div>
+    </div>
+
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost" id="categoryCancel">Cancel</button>
+      <button type="submit" class="btn">Save category</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ user dialog ============ -->
+<dialog id="userDialog">
+  <form method="dialog" id="userForm">
+    <div class="dlg-head">
+      <h3 id="userDialogTitle">Add user</h3>
+      <button type="button" id="userDialogClose">&#10005;</button>
+    </div>
+
+    <div class="dlg-body">
+      <div class="grid2">
+        <div class="field"><label>Name</label><input type="text" id="fuName" required></div>
+        <div class="field"><label>Username</label><input type="text" id="fuUser" required autocomplete="off"></div>
+      </div>
+
+      <div class="field">
+        <label>Role</label>
+        <select id="fuRole">
+          <option value="Staff">Staff &mdash; orders only</option>
+          <option value="Manager">Manager &mdash; products, categories, orders</option>
+          <option value="Owner">Owner &mdash; everything, including users</option>
+        </select>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label id="fuPassLabel">Password</label>
+          <input type="password" id="fuPass" autocomplete="new-password">
+          <div class="help" id="fuPassHelp">8 characters or more.</div>
+        </div>
+        <div class="field">
+          <label>Repeat password</label>
+          <input type="password" id="fuPass2" autocomplete="new-password">
+        </div>
+      </div>
+
+      <div id="fuError" class="dlg-err"></div>
+    </div>
+
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost" id="userCancel">Cancel</button>
+      <button type="submit" class="btn">Save user</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ change password dialog ============ -->
+<dialog id="passwordDialog">
+  <form method="dialog" id="passwordForm">
+    <div class="dlg-head">
+      <h3>Change your password</h3>
+      <button type="button" id="passwordDialogClose">&#10005;</button>
+    </div>
+
+    <div class="dlg-body">
+      <div class="field">
+        <label>Current password</label>
+        <input type="password" id="pwCurrent" autocomplete="current-password">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>New password</label>
+          <input type="password" id="pwNew" autocomplete="new-password">
+          <div class="help">8 characters or more.</div>
+        </div>
+        <div class="field">
+          <label>Repeat new password</label>
+          <input type="password" id="pwNew2" autocomplete="new-password">
+        </div>
+      </div>
+      <div id="pwError" class="dlg-err"></div>
+    </div>
+
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost" id="passwordCancel">Cancel</button>
+      <button type="submit" class="btn">Change password</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ recovery code dialog ============ -->
+<dialog id="recoveryDialog">
+  <div class="dlg-head">
+    <h3 id="recoveryTitle">Recovery code</h3>
+  </div>
+
+  <div class="dlg-body">
+    <p style="font-size:13px;line-height:1.7;color:#555">
+      This is the only way back into <strong id="recoveryFor">this account</strong>
+      if the password is forgotten. Write it down or save the file somewhere
+      safe &mdash; a notebook, or a note on your phone.
+    </p>
+
+    <div class="codebox" id="recoveryCode"></div>
+
+    <div class="row">
+      <button type="button" class="btn ghost small" id="recoveryCopy">Copy code</button>
+      <button type="button" class="btn ghost small" id="recoverySave">Download as a text file</button>
+    </div>
+
+    <div class="code-warn">
+      It is shown once and never again. Nobody can look it up later, not even
+      you &mdash; only a hashed version is stored. If both the password and this
+      code are lost, an Owner has to reset the account from the Users tab.
+    </div>
+  </div>
+
+  <div class="dlg-foot">
+    <button type="button" class="btn" id="recoveryDone">I have saved it</button>
+  </div>
+</dialog>
+
+<input type="file" id="usersInput" accept="application/json" hidden>
+<input type="file" id="restoreInput" accept="application/json" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================
+   Osama Garments admin
+   Edits a copy of store-data.js held in this browser, then
+   hands it back as a file you drop into the shop folder.
+   ========================================================== */
+
+const DRAFT_KEY   = "osamaStoreDraft";
+const DRAFT_AT_KEY = "osamaStoreDraftAt";
+const ORDERS_KEY  = "osamaOrders";
+const USERS_KEY   = "osamaAdminUsers";
+const SESSION_KEY = "osamaAdminSession";
+
+/* What each role may do. A tab it cannot see is hidden, and an action it
+   cannot perform is never rendered, rather than rendered and then refused. */
+const ROLES = {
+  Owner: {
+    label:"Owner",
+    tabs:["products","categories","content","contact","orders","users","website"],
+    editProducts:true, editCategories:true, editContent:true,
+    editContact:true, manageOrders:true, manageUsers:true,
+    publish:true, backup:true, manageSite:true
+  },
+  Manager: {
+    label:"Manager",
+    tabs:["products","categories","orders"],
+    editProducts:true, editCategories:true, manageOrders:true, publish:true
+  },
+  Staff: {
+    label:"Staff",
+    tabs:["products","orders"],
+    manageOrders:true
+  }
+};
+
+let store = null;
+let session = null;
+let editingProductId = null;
+let editingCategoryIndex = null;
+
+/* ---------- helpers ---------- */
+
+const $ = id => document.getElementById(id);
+
+function esc(text){
+  return String(text ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+}
+
+function money(n){
+  return "Rs. " + Number(n || 0).toLocaleString("en-PK");
+}
+
+function toast(message){
+  const el = $("toast");
+  el.textContent = message;
+  el.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+}
+
+function deepCopy(value){
+  return JSON.parse(JSON.stringify(value));
+}
+
+/* ---------- load / save ---------- */
+
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(DRAFT_KEY);
+
+    if (raw){
+      const draft = JSON.parse(raw);
+
+      // a draft older than the published file is out of date - drop it.
+      // savedAt travels inside the draft, so it is always written in the
+      // same operation as the draft itself and can never lag behind it.
+      const published = window.STORE_DATA;
+      const stamp   = draft.savedAt || localStorage.getItem(DRAFT_AT_KEY) || "";
+      const draftAt = Date.parse(stamp) || 0;
+      const fileAt  = published ? (Date.parse(published.publishedAt) || 0) : 0;
+
+      if (fileAt && draftAt < fileAt){
+        localStorage.removeItem(DRAFT_KEY);
+        localStorage.removeItem(DRAFT_AT_KEY);
+      } else if (draft && draft.products){
+        markDirty(true);
+        return draft;
+      }
+    }
+  }catch(err){ /* fall through to the published file */ }
+
+  if (!window.STORE_DATA){
+    document.body.innerHTML =
+      "<p style='padding:60px;font-family:sans-serif'>store-data.js is missing from this folder, " +
+      "so there is nothing to edit. Put it back beside this page and reload.</p>";
+    throw new Error("no store-data.js");
+  }
+
+  return deepCopy(window.STORE_DATA);
+}
+
+function save(){
+  try{
+    // the time goes INSIDE the draft, so the two always agree. The separate
+    // key is kept as a cheap "something changed" signal for the shop page.
+    store.savedAt = new Date().toISOString();
+
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(store));
+    localStorage.setItem(DRAFT_AT_KEY, store.savedAt);
+    markDirty(true);
+  }catch(err){
+    toast("Could not save - browser storage is full or blocked");
+  }
+}
+
+function markDirty(isDirty){
+  $("dirtyWarn").hidden = !isDirty;
+}
+
+
+/* Throw the draft away and go back to whatever store-data.js says.
+   Clearing both keys is what tells an open shop tab to switch back. */
+function revertDraft(){
+
+  if (!confirm(
+    "Undo every change you have made since the last download?\n\n" +
+    "The admin and the shop both go back to what is in store-data.js."
+  )) return;
+
+  localStorage.removeItem(DRAFT_KEY);
+  localStorage.removeItem(DRAFT_AT_KEY);
+
+  store = deepCopy(window.STORE_DATA);
+
+  markDirty(false);
+  start(true);
+  toast("Changes undone");
+}
+
+/* ---------- products ---------- */
+
+function nextProductId(){
+  return store.products.reduce((max, p) => Math.max(max, Number(p.id) || 0), 0) + 1;
+}
+
+function visibleProducts(){
+  const category = $("filterCategory").value;
+  const query = $("searchProducts").value.toLowerCase().trim();
+
+  return store.products.filter(p => {
+    if (category && p.category !== category) return false;
+    if (!query) return true;
+    return (p.name + " " + p.category + " " + (p.description || ""))
+      .toLowerCase().includes(query);
+  });
+}
+
+function renderProductsTable(){
+
+  const list = visibleProducts();
+
+  $("productCount").textContent =
+    list.length === store.products.length
+      ? store.products.length + " products"
+      : list.length + " of " + store.products.length + " products";
+
+  const wrap = $("productsTableWrap");
+
+  if (!store.products.length){
+    wrap.innerHTML = '<div class="empty">No products yet. Press <strong>Add product</strong> to create the first one.</div>';
+    return;
+  }
+
+  if (!list.length){
+    wrap.innerHTML = '<div class="empty">Nothing matches that filter.</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th></th><th>Name</th><th>Category</th><th class="right">Price</th>
+          <th>Tag</th><th>Sizes</th>${can("editProducts") ? "<th></th>" : ""}
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(p => `
+          <tr>
+            <td class="thumb"><img src="${esc(p.image)}" alt="" onerror="this.style.visibility='hidden'"></td>
+            <td><strong>${esc(p.name)}</strong><div class="muted">#${p.id}</div></td>
+            <td>${esc(p.category)}</td>
+            <td class="right nowrap">${money(p.price)}</td>
+            <td>${p.tag ? '<span class="tag">' + esc(p.tag) + '</span>' : '<span class="muted">&mdash;</span>'}</td>
+            <td class="muted">${esc((p.sizes || []).join(", "))}</td>
+            ${can("editProducts") ? `
+            <td class="right nowrap">
+              <button class="btn ghost small" data-edit="${p.id}">Edit</button>
+              <button class="btn ghost small" data-copy="${p.id}">Duplicate</button>
+              <button class="btn danger small" data-del="${p.id}">Delete</button>
+            </td>` : ""}
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  wrap.querySelectorAll("[data-edit]").forEach(b =>
+    b.onclick = () => openProduct(Number(b.dataset.edit)));
+
+  wrap.querySelectorAll("[data-copy]").forEach(b =>
+    b.onclick = () => duplicateProduct(Number(b.dataset.copy)));
+
+  wrap.querySelectorAll("[data-del]").forEach(b =>
+    b.onclick = () => deleteProduct(Number(b.dataset.del)));
+}
+
+function openProduct(id){
+
+  editingProductId = id;
+
+  const product = id == null
+    ? { name:"", category:(store.categories[0]||{}).name || "", price:"", tag:"",
+        image:"", description:"", sizes:["S","M","L","XL"], colors:["Black"] }
+    : store.products.find(p => p.id === id);
+
+  $("productDialogTitle").textContent = id == null ? "Add product" : "Edit product";
+
+  const categorySelect = $("fCategory");
+  categorySelect.innerHTML = store.categories
+    .map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("");
+  categorySelect.value = product.category;
+
+  $("fName").value = product.name;
+  $("fPrice").value = product.price;
+  $("fTag").value = product.tag || "";
+  $("fImage").value = product.image || "";
+  $("fDescription").value = product.description || "";
+  $("fSizes").value = (product.sizes || []).join(", ");
+  $("fColors").value = (product.colors || []).join(", ");
+
+  updateProductPreview();
+  $("productDialog").showModal();
+  $("fName").focus();
+}
+
+function updateProductPreview(){
+  $("pvName").textContent = $("fName").value || "Product name";
+  $("pvCategory").textContent = $("fCategory").value || "";
+  $("pvPrice").textContent = $("fPrice").value ? money($("fPrice").value) : "";
+  const img = $("pvImage");
+  img.src = $("fImage").value || "";
+  img.style.visibility = $("fImage").value ? "visible" : "hidden";
+}
+
+function splitList(value){
+  return value.split(",").map(s => s.trim()).filter(Boolean);
+}
+
+$("productForm").addEventListener("submit", e => {
+  e.preventDefault();
+
+  const data = {
+    name: $("fName").value.trim(),
+    category: $("fCategory").value,
+    price: Number($("fPrice").value) || 0,
+    tag: $("fTag").value.trim(),
+    image: $("fImage").value.trim(),
+    description: $("fDescription").value.trim(),
+    sizes: splitList($("fSizes").value),
+    colors: splitList($("fColors").value)
+  };
+
+  if (!data.name) return;
+
+  if (editingProductId == null){
+    store.products.push(Object.assign({ id: nextProductId() }, data));
+    toast("Product added");
+  } else {
+    const product = store.products.find(p => p.id === editingProductId);
+    Object.assign(product, data);
+    toast("Product saved");
+  }
+
+  save();
+  renderProductsTable();
+  $("productDialog").close();
+});
+
+function duplicateProduct(id){
+  const source = store.products.find(p => p.id === id);
+  const copy = deepCopy(source);
+  copy.id = nextProductId();
+  copy.name = source.name + " (copy)";
+  store.products.push(copy);
+  save();
+  renderProductsTable();
+  toast("Duplicated");
+}
+
+function deleteProduct(id){
+  const product = store.products.find(p => p.id === id);
+  if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+  store.products = store.products.filter(p => p.id !== id);
+  save();
+  renderProductsTable();
+  toast("Product deleted");
+}
+
+/* ---------- categories ---------- */
+
+function renderCategories(){
+
+  const wrap = $("categoriesWrap");
+
+  if (!store.categories.length){
+    wrap.innerHTML = '<div class="empty">No categories yet.</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th></th><th>Name</th><th class="right">Products</th>${can("editCategories") ? "<th></th>" : ""}</tr></thead>
+      <tbody>
+        ${store.categories.map((c, i) => {
+          const count = store.products.filter(p => p.category === c.name).length;
+          return `
+          <tr>
+            <td class="thumb"><img src="${esc(c.image)}" alt="" onerror="this.style.visibility='hidden'"></td>
+            <td><strong>${esc(c.name)}</strong></td>
+            <td class="right">${count}</td>
+            ${can("editCategories") ? `
+            <td class="right nowrap">
+              <button class="btn ghost small" data-up="${i}" ${i === 0 ? "disabled" : ""}>&uarr;</button>
+              <button class="btn ghost small" data-down="${i}" ${i === store.categories.length - 1 ? "disabled" : ""}>&darr;</button>
+              <button class="btn ghost small" data-edit="${i}">Edit</button>
+              <button class="btn danger small" data-del="${i}">Delete</button>
+            </td>` : ""}
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+
+  wrap.querySelectorAll("[data-edit]").forEach(b =>
+    b.onclick = () => openCategory(Number(b.dataset.edit)));
+
+  wrap.querySelectorAll("[data-del]").forEach(b =>
+    b.onclick = () => deleteCategory(Number(b.dataset.del)));
+
+  wrap.querySelectorAll("[data-up]").forEach(b =>
+    b.onclick = () => moveCategory(Number(b.dataset.up), -1));
+
+  wrap.querySelectorAll("[data-down]").forEach(b =>
+    b.onclick = () => moveCategory(Number(b.dataset.down), 1));
+
+  const select = $("filterCategory");
+  const current = select.value;
+  select.innerHTML = '<option value="">All categories</option>' +
+    store.categories.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("");
+  select.value = current;
+}
+
+function moveCategory(index, direction){
+  const target = index + direction;
+  if (target < 0 || target >= store.categories.length) return;
+  const [item] = store.categories.splice(index, 1);
+  store.categories.splice(target, 0, item);
+  save();
+  renderCategories();
+}
+
+function openCategory(index){
+
+  editingCategoryIndex = index;
+
+  const category = index == null ? { name:"", image:"" } : store.categories[index];
+
+  $("categoryDialogTitle").textContent = index == null ? "Add category" : "Edit category";
+  $("fCatName").value = category.name;
+  $("fCatImage").value = category.image || "";
+
+  const count = index == null ? 0 :
+    store.products.filter(p => p.category === category.name).length;
+
+  $("renameNote").hidden = !count;
+  $("renameNoteText").textContent =
+    count ? `Renaming this will also update the ${count} product${count === 1 ? "" : "s"} in it.` : "";
+
+  updateCategoryPreview();
+  $("categoryDialog").showModal();
+  $("fCatName").focus();
+}
+
+function updateCategoryPreview(){
+  $("cvName").textContent = $("fCatName").value || "Category";
+  const img = $("cvImage");
+  img.src = $("fCatImage").value || "";
+  img.style.visibility = $("fCatImage").value ? "visible" : "hidden";
+}
+
+$("categoryForm").addEventListener("submit", e => {
+  e.preventDefault();
+
+  const name = $("fCatName").value.trim();
+  const image = $("fCatImage").value.trim();
+
+  if (!name) return;
+
+  if (editingCategoryIndex == null){
+    store.categories.push({ name, image });
+    toast("Category added");
+  } else {
+    const old = store.categories[editingCategoryIndex].name;
+
+    if (old !== name){
+      store.products.forEach(p => { if (p.category === old) p.category = name; });
+    }
+
+    store.categories[editingCategoryIndex] = { name, image };
+    toast("Category saved");
+  }
+
+  save();
+  renderCategories();
+  renderProductsTable();
+  $("categoryDialog").close();
+});
+
+function deleteCategory(index){
+
+  const category = store.categories[index];
+  const count = store.products.filter(p => p.category === category.name).length;
+
+  if (count){
+    alert(
+      `"${category.name}" still has ${count} product${count === 1 ? "" : "s"} in it.\n\n` +
+      `Move or delete those products first, otherwise they would disappear from the shop ` +
+      `with no way to reach them.`
+    );
+    return;
+  }
+
+  if (!confirm(`Delete the "${category.name}" category?`)) return;
+
+  store.categories.splice(index, 1);
+  save();
+  renderCategories();
+  toast("Category deleted");
+}
+
+/* ---------- site text ---------- */
+
+const CONTENT_FIELDS = [
+  ["Browser tab & search results", [
+    ["pageTitle", "Page title", "text"],
+    ["metaDescription", "Search description", "area"]
+  ]],
+  ["Top bar", [
+    ["announcement", "Announcement strip", "text"]
+  ]],
+  ["Hero", [
+    ["heroEyebrow", "Small label above the heading", "text"],
+    ["heroTitle", "Heading, first part", "text"],
+    ["heroTitleAccent", "Heading, gold part", "text"],
+    ["heroText", "Paragraph", "area"],
+    ["heroImages", "Main display photos", "list"]
+  ]],
+  ["Lookbook", [
+    ["lookEyebrow", "Small label", "text"],
+    ["lookTitle", "Heading", "text"],
+    ["lookText", "Line under the heading", "text"]
+  ]],
+  ["Category section", [
+    ["catEyebrow", "Small label", "text"],
+    ["catTitle", "Heading", "text"],
+    ["catText", "Line under the heading", "text"]
+  ]],
+  ["Shop section", [
+    ["shopEyebrow", "Small label", "text"],
+    ["shopTitle", "Heading", "text"],
+    ["shopText", "Line under the heading", "text"]
+  ]],
+  ["Promise banner", [
+    ["bannerEyebrow", "Small label", "text"],
+    ["bannerTitleA", "Heading, line one", "text"],
+    ["bannerTitleB", "Heading, line two", "text"],
+    ["bannerText", "Paragraph", "area"]
+  ]],
+  ["Our story", [
+    ["storyEyebrow", "Small label", "text"],
+    ["storyTitle", "Heading", "text"],
+    ["storyP1", "First paragraph", "area"],
+    ["storyP2", "Second paragraph", "area"],
+    ["storyImage", "Photo URL", "text"]
+  ]],
+  ["Newsletter", [
+    ["newsEyebrow", "Small label", "text"],
+    ["newsTitle", "Heading", "text"],
+    ["newsText", "Line under the heading", "text"]
+  ]],
+  ["Footer", [
+    ["footerDescription", "Text under the logo", "area"],
+    ["footerLocation", "Location line", "text"],
+    ["footerCopyright", "Copyright line", "text"]
+  ]]
+];
+
+function renderContentFields(){
+
+  $("contentFields").innerHTML = CONTENT_FIELDS.map(([group, fields]) => `
+    <div class="card">
+      <h3>${esc(group)}</h3>
+      ${fields.map(([key, label, type]) => `
+        <div class="field">
+          <label for="ct_${key}">${esc(label)}</label>
+          ${type === "area" || type === "list"
+            ? `<textarea id="ct_${key}" data-content="${key}"
+                 ${type === "list" ? 'data-list="1"' : ""}></textarea>`
+            : `<input type="text" id="ct_${key}" data-content="${key}">`}
+          ${type === "list"
+            ? '<div class="help">One photo URL per line. Two or more and the main display moves through them; one and it stays still.</div>'
+            : ""}
+        </div>`).join("")}
+    </div>`).join("");
+
+  document.querySelectorAll("[data-content]").forEach(el => {
+
+    const key = el.dataset.content;
+    const isList = el.dataset.list === "1";
+    const value = store.content[key];
+
+    el.value = isList
+      ? (Array.isArray(value) ? value.join("\n") : (value || ""))
+      : (value || "");
+
+    el.addEventListener("input", () => {
+
+      if (isList) {
+        const lines = el.value.split("\n").map(l => l.trim()).filter(Boolean);
+
+        if (key === "heroImages") {
+          // Each photo carries its own focal point. Follow it by URL so
+          // reordering keeps it, and a brand new photo starts centred
+          // rather than inheriting the last one's crop.
+          const was  = store.content.heroImages || [];
+          const foci = store.content.heroFocus  || [];
+          const byUrl = {};
+          was.forEach((u, i) => { if (foci[i]) byUrl[u] = foci[i]; });
+          store.content.heroFocus = lines.map(u => byUrl[u] || "center");
+          store.content.heroImage = lines[0] || "";
+        }
+
+        store.content[key] = lines;
+      } else {
+        store.content[key] = el.value;
+      }
+
+      save();
+    });
+  });
+}
+
+/* ---------- contact ---------- */
+
+function renderContact(){
+
+  const bind = (id, object, key) => {
+    const el = $(id);
+    el.value = object[key] || "";
+    el.addEventListener("input", () => {
+      object[key] = el.value.trim();
+      save();
+      if (id === "brandName") $("barBrand").textContent = el.value;
+    });
+  };
+
+  bind("brandName", store.brand, "name");
+  bind("brandTagline", store.brand, "tagline");
+  bind("cEmail", store.contact, "email");
+  bind("cPhoneDisplay", store.contact, "phoneDisplay");
+  bind("cPhoneDial", store.contact, "phoneDial");
+  bind("cWhatsapp", store.contact, "whatsapp");
+
+  $("barBrand").textContent = store.brand.name || "Admin";
+}
+
+/* ---------- orders ---------- */
+
+function readOrders(){
+  try{ return JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]"); }
+  catch(err){ return []; }
+}
+
+function writeOrders(orders){
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+}
+
+function renderOrders(){
+
+  const orders = readOrders();
+  const wrap = $("ordersWrap");
+
+  if (!orders.length){
+    wrap.innerHTML = '<div class="empty">No orders recorded in this browser yet.</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr><th>Order</th><th>When</th><th>Customer</th><th>Items</th>
+            <th class="right">Total</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        ${orders.map((o, i) => `
+          <tr>
+            <td class="nowrap"><strong>${esc(o.id || "-")}</strong></td>
+            <td class="muted nowrap">${new Date(o.createdAt).toLocaleString()}</td>
+            <td>
+              ${esc(o.customer.name)}<div class="muted">${esc(o.customer.phone)}</div>
+            </td>
+            <td class="muted">
+              ${o.products.map(p => esc(p.name) + " &times;" + p.quantity).join("<br>")}
+            </td>
+            <td class="right nowrap">${money(o.total)}</td>
+            <td><span class="pill ${esc(o.status || "New")}">${esc(o.status || "New")}</span></td>
+            <td class="right">
+              ${!can("manageOrders") ? "" : `
+              <select data-status="${i}" style="width:auto">
+                ${["New","Confirmed","Delivered","Cancelled"].map(s =>
+                  `<option ${s === (o.status || "New") ? "selected" : ""}>${s}</option>`).join("")}
+              </select>`}
+            </td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  wrap.querySelectorAll("[data-status]").forEach(select => {
+    select.onchange = () => {
+      const orders = readOrders();
+      orders[Number(select.dataset.status)].status = select.value;
+      writeOrders(orders);
+      renderOrders();
+    };
+  });
+}
+
+function exportOrdersCsv(){
+
+  const orders = readOrders();
+
+  if (!orders.length){ toast("No orders to export"); return; }
+
+  const rows = [["Order","Date","Name","Phone","Email","Address","Payment","Items","Total","Status"]];
+
+  orders.forEach(o => rows.push([
+    o.id || "", o.createdAt || "", o.customer.name, o.customer.phone,
+    o.customer.email || "", o.customer.address, o.payment,
+    o.products.map(p => `${p.name} (${p.size}${p.color ? "/" + p.color : ""}) x${p.quantity}`).join("; "),
+    o.total, o.status || "New"
+  ]));
+
+  const csv = rows.map(r =>
+    r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+  ).join("\n");
+
+  download("orders.csv", csv, "text/csv");
+}
+
+/* ---------- publish / backup ---------- */
+
+function download(filename, text, type){
+  const blob = new Blob([text], { type: (type || "text/plain") + ";charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function publish(){
+
+  // stamp it so the shop can tell this file is newer than any saved draft
+  store.publishedAt = new Date().toISOString();
+  save();
+
+  // savedAt is draft bookkeeping - it has no business in the published file
+  const forFile = deepCopy(store);
+  delete forFile.savedAt;
+
+  const file =
+    "// ==========================================\n" +
+    "// OSAMA GARMENTS - STORE DATA\n" +
+    "//\n" +
+    "// This file is written by admin.html.\n" +
+    "// Edit it there, download the new copy, and replace this file.\n" +
+    "// ==========================================\n\n" +
+    "window.STORE_DATA = " + JSON.stringify(forFile, null, 2) + ";\n";
+
+  download("store-data.js", file, "application/javascript");
+
+  alert(
+    "store-data.js has been downloaded.\n\n" +
+    "To make these changes real:\n" +
+    "1. Open your Downloads folder\n" +
+    "2. Move store-data.js into the \"Garments store\" folder\n" +
+    "3. Replace the old file when Windows asks\n\n" +
+    "Until you do that, the changes only exist in this browser."
+  );
+}
+
+/* ==========================================================
+   WEBSITE
+   Pushes the shop straight to GitHub, which is what serves the
+   public site. The token lives in this browser on this computer
+   and is never written into any file that goes online.
+   ========================================================== */
+
+const SITE_KEY = "osamaSiteConfig";
+
+const SHOP_FILES = ["index.html", "style.css", "script.js", "store-data.js"];
+
+function siteConfig(){
+  try{ return JSON.parse(localStorage.getItem(SITE_KEY) || "{}"); }
+  catch(err){ return {}; }
+}
+
+function siteUrl(cfg){
+  if (!cfg.owner || !cfg.repo) return "";
+  return "https://" + cfg.owner.toLowerCase() + ".github.io/" + cfg.repo + "/";
+}
+
+function ghLog(text, kind){
+  $("ghLogCard").hidden = false;
+  const line = document.createElement("div");
+  if (kind) line.className = kind;
+  line.textContent = text;
+  $("ghLog").appendChild(line);
+  $("ghLog").scrollTop = $("ghLog").scrollHeight;
+}
+
+function ghClear(){
+  $("ghLog").innerHTML = "";
+  $("ghLogCard").hidden = true;
+}
+
+function renderWebsite(){
+
+  const cfg = siteConfig();
+
+  // the site that already exists, so only the token has to be typed in
+  $("ghOwner").value  = cfg.owner  || "osamanadeem883-lang";
+  $("ghRepo").value   = cfg.repo   || "osamagarments";
+  $("ghBranch").value = cfg.branch || "main";
+  $("ghToken").value  = cfg.token  || "";
+  $("ghFolder").value = cfg.folder || "images";
+
+  const url = siteUrl(cfg);
+  $("ghVisit").href = url || "#";
+  $("ghVisit").hidden = !url;
+  $("ghWho").textContent = url ? url : "Not connected yet";
+}
+
+function readSiteForm(){
+  return {
+    owner:  $("ghOwner").value.trim(),
+    repo:   $("ghRepo").value.trim(),
+    branch: $("ghBranch").value.trim() || "main",
+    token:  $("ghToken").value.trim(),
+    folder: $("ghFolder").value.trim()
+  };
+}
+
+function saveSiteConfig(cfg){
+  localStorage.setItem(SITE_KEY, JSON.stringify(cfg));
+}
+
+/* base64 that survives accented characters and em dashes */
+function toBase64(text){
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  bytes.forEach(b => { binary += String.fromCharCode(b); });
+  return btoa(binary);
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read " + file.name));
+    reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+    reader.readAsDataURL(file);
+  });
+}
+
+async function gh(cfg, path, options){
+
+  const url = "https://api.github.com/repos/" + cfg.owner + "/" + cfg.repo + path;
+
+  const response = await fetch(url, Object.assign({
+    headers: {
+      "Authorization": "Bearer " + cfg.token,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28"
+    }
+  }, options || {}));
+
+  let body = null;
+  try{ body = await response.json(); }catch(err){ body = null; }
+
+  return { ok: response.ok, status: response.status, body: body };
+}
+
+/* GitHub needs the current sha to replace a file; a missing file has none */
+async function ghSha(cfg, path){
+  const got = await gh(cfg, "/contents/" + encodeURI(path) + "?ref=" + encodeURIComponent(cfg.branch));
+  return got.ok && got.body ? got.body.sha : null;
+}
+
+async function ghPut(cfg, path, base64, message){
+
+  const sha = await ghSha(cfg, path);
+
+  const result = await gh(cfg, "/contents/" + encodeURI(path), {
+    method: "PUT",
+    body: JSON.stringify({
+      message: message,
+      content: base64,
+      branch: cfg.branch,
+      sha: sha || undefined
+    })
+  });
+
+  if (!result.ok) {
+    throw new Error(path + " - " + ghReason(result));
+  }
+
+  return sha ? "updated" : "added";
+}
+
+function ghReason(result){
+
+  const message = (result.body && result.body.message) || "";
+
+  if (result.status === 401) return "the token was not accepted. Make a new one and paste it in again.";
+  if (result.status === 403) return "the token is missing permission. It needs Contents: Read and write on this repository.";
+  if (result.status === 404) return "repository not found, or the token cannot see it. Check the username and repository name.";
+  if (result.status === 409) return "the branch name looks wrong. It is usually main.";
+  if (result.status === 422) return "GitHub rejected the file. " + message;
+
+  return message || ("HTTP " + result.status);
+}
+
+function siteReady(cfg, quiet){
+
+  if (cfg.owner && cfg.repo && cfg.token) return true;
+
+  if (!quiet) {
+    ghClear();
+    ghLog("Fill in your GitHub username, repository and token first, then press Save.", "bad");
+  }
+
+  return false;
+}
+
+
+/* The text of store-data.js, exactly as the download and both publish
+   buttons write it. Stamped first, so the file always looks newer than a
+   draft sitting in a visitor's browser. */
+function storeDataFileBody(){
+
+  store.publishedAt = new Date().toISOString();
+  save();
+
+  const forFile = deepCopy(store);
+  delete forFile.savedAt;
+
+  return "// ==========================================\n" +
+         "// OSAMA GARMENTS - STORE DATA\n" +
+         "//\n" +
+         "// This file is written by admin.html.\n" +
+         "// ==========================================\n\n" +
+         "window.STORE_DATA = " + JSON.stringify(forFile, null, 2) + ";\n";
+}
+
+
+/* Is GitHub Pages actually switched on? A repository full of the right
+   files still shows nothing until it is, which looks like the publish
+   failed when it did not. */
+async function ensurePages(cfg, enable){
+
+  const pages = await gh(cfg, "/pages");
+
+  if (pages.ok && pages.body && pages.body.html_url) {
+    ghLog("Website: " + pages.body.html_url, "ok");
+    return;
+  }
+
+  if (!enable) {
+    ghLog("GitHub Pages is not switched on for this repository - nothing will", "bad");
+    ghLog("show until it is. Publishing the whole website turns it on for you.", "bad");
+    return;
+  }
+
+  ghLog("The website is not switched on for this repository yet. Trying ...", "step");
+
+  const made = await gh(cfg, "/pages", {
+    method: "POST",
+    body: JSON.stringify({ source: { branch: cfg.branch, path: "/" } })
+  });
+
+  if (made.ok) {
+    ghLog("Switched on. The first build takes a few minutes.", "ok");
+    return;
+  }
+
+  ghLog("Could not switch it on from here - do it once by hand:", "bad");
+  ghLog("   github.com/" + cfg.owner + "/" + cfg.repo +
+        " > Settings > Pages > Branch: " + cfg.branch + " /(root) > Save", "bad");
+}
+
+
+/* ---------- actions ---------- */
+
+$("btnGhSave").onclick = () => {
+  const cfg = readSiteForm();
+  saveSiteConfig(cfg);
+  renderWebsite();
+  ghClear();
+  ghLog("Saved on this computer.", "ok");
+  toast("Website details saved");
+};
+
+$("btnGhForget").onclick = () => {
+  if (!confirm("Forget the access token on this computer?")) return;
+  const cfg = siteConfig();
+  delete cfg.token;
+  saveSiteConfig(cfg);
+  renderWebsite();
+  toast("Token forgotten");
+};
+
+$("btnGhTest").onclick = async () => {
+
+  const cfg = readSiteForm();
+  saveSiteConfig(cfg);
+  ghClear();
+
+  if (!siteReady(cfg)) return;
+
+  ghLog("Checking " + cfg.owner + "/" + cfg.repo + " ...", "step");
+
+  const repo = await gh(cfg, "");
+
+  if (!repo.ok) { ghLog("Could not connect: " + ghReason(repo), "bad"); return; }
+
+  ghLog("Connected. Branch on GitHub: " + repo.body.default_branch, "ok");
+
+  if (repo.body.default_branch !== cfg.branch) {
+    ghLog('Your branch says "' + cfg.branch + '" but GitHub says "' +
+          repo.body.default_branch + '". Change it above, or publishing will fail.', "bad");
+  }
+
+  const pages = await gh(cfg, "/pages");
+  if (pages.ok && pages.body && pages.body.html_url) {
+    ghLog("Website: " + pages.body.html_url, "ok");
+  }
+};
+
+$("btnGhPublishAll").onclick = async () => {
+
+  const cfg = readSiteForm();
+  saveSiteConfig(cfg);
+  ghClear();
+
+  if (!siteReady(cfg)) return;
+
+  const picked = Array.from($("ghSiteFolder").files || []);
+
+  if (!picked.length) {
+    ghLog("Press Choose first and pick your \"Upload to web\" folder.", "bad");
+    return;
+  }
+
+  // The browser hands back paths like "Upload to web/images/header-1.jpg".
+  // The folder you picked IS the top of the website, so its own name goes.
+  const skipped = [];
+  const queue = [];
+
+  picked.forEach(file => {
+
+    const full = (file.webkitRelativePath || file.name).replace(/\\/g, "/");
+    const path = full.split("/").slice(1).join("/") || file.name;
+    const name = path.split("/").pop().toLowerCase();
+
+    if (name === "admin.html") {
+      skipped.push(path + " - never goes online");
+      return;
+    }
+
+    // a note to you, not part of the shop
+    if (name.endsWith(".txt") || name.endsWith(".md")) {
+      skipped.push(path);
+      return;
+    }
+
+    // written fresh below, from this admin rather than the old copy on disk
+    if (path === "store-data.js") return;
+
+    if (name.startsWith(".") || name === "thumbs.db" || name === "desktop.ini") return;
+
+    if (file.size > 25 * 1024 * 1024) {
+      skipped.push(path + " - too big to send this way");
+      return;
+    }
+
+    queue.push({ file: file, path: path });
+  });
+
+  // index.html last, so the page never goes up before the files it needs
+  queue.sort((a, b) => (a.path === "index.html" ? 1 : 0) - (b.path === "index.html" ? 1 : 0));
+
+  if (!queue.length) {
+    ghLog("Nothing in that folder to send. Did you pick the right one?", "bad");
+    return;
+  }
+
+  const button = $("btnGhPublishAll");
+  button.disabled = true;
+  const label = button.textContent;
+  button.textContent = "Sending...";
+
+  let done = 0;
+  let failed = 0;
+
+  try {
+
+    ghLog("Sending store-data.js ...", "step");
+
+    try {
+      const what = await ghPut(cfg, "store-data.js", toBase64(storeDataFileBody()),
+                               "Update shop content from admin");
+      ghLog("store-data.js " + what + ".", "ok");
+      done++;
+    } catch (err) {
+      ghLog("Failed: " + err.message, "bad");
+      failed++;
+    }
+
+    for (const item of queue) {
+
+      ghLog("Sending " + item.path +
+            " (" + Math.round(item.file.size / 1024) + " KB) ...", "step");
+
+      try {
+        const base64 = await fileToBase64(item.file);
+        const what = await ghPut(cfg, item.path, base64, "Publish " + item.path + " from admin");
+        ghLog(item.path + " " + what + ".", "ok");
+        done++;
+      } catch (err) {
+        ghLog("Failed: " + err.message, "bad");
+        failed++;
+      }
+    }
+
+    skipped.forEach(path => ghLog("Left out: " + path, "step"));
+
+    ghLog("", "step");
+    ghLog(done + " file(s) are on the website now." +
+          (failed ? " " + failed + " failed - see above." : ""), failed ? "bad" : "ok");
+
+    if (!failed) {
+      await ensurePages(cfg, true);
+      ghLog("Give it a minute, then open " + siteUrl(cfg) + " and press Ctrl+F5.", "ok");
+      markDirty(false);
+      toast("The whole website is online");
+    }
+
+  } finally {
+    button.disabled = false;
+    button.textContent = label;
+  }
+};
+
+
+$("btnGhPublish").onclick = async () => {
+
+  const cfg = readSiteForm();
+  saveSiteConfig(cfg);
+  ghClear();
+
+  if (!siteReady(cfg)) return;
+
+  const button = $("btnGhPublish");
+  button.disabled = true;
+  const label = button.textContent;
+  button.textContent = "Publishing...";
+
+  try{
+    const body = storeDataFileBody();
+
+    ghLog("Sending store-data.js ...", "step");
+
+    const what = await ghPut(cfg, "store-data.js", toBase64(body),
+                             "Update shop content from admin");
+
+    ghLog("store-data.js " + what + ".", "ok");
+    ghLog("", "step");
+    ghLog("Done. The website rebuilds itself - give it about a minute, then", "ok");
+    ghLog("open " + siteUrl(cfg) + " and press Ctrl+F5.", "ok");
+
+    markDirty(false);
+    toast("Published to the website");
+
+  }catch(err){
+    ghLog("Failed: " + err.message, "bad");
+    ghLog("Nothing on the website was changed.", "step");
+  }finally{
+    button.disabled = false;
+    button.textContent = label;
+  }
+};
+
+$("btnGhUpload").onclick = async () => {
+
+  const cfg = readSiteForm();
+  saveSiteConfig(cfg);
+  ghClear();
+
+  if (!siteReady(cfg)) return;
+
+  const files = Array.from($("ghFiles").files || []);
+
+  if (!files.length) { ghLog("Pick some files first.", "bad"); return; }
+
+  const folder = cfg.folder.replace(/^\/+|\/+$/g, "");
+
+  const button = $("btnGhUpload");
+  button.disabled = true;
+
+  let done = 0;
+
+  for (const file of files){
+
+    const path = folder ? folder + "/" + file.name : file.name;
+
+    try{
+      ghLog("Sending " + path + " (" + Math.round(file.size / 1024) + " KB) ...", "step");
+      const base64 = await fileToBase64(file);
+      const what = await ghPut(cfg, path, base64, "Upload " + file.name + " from admin");
+      ghLog(path + " " + what + ".", "ok");
+      done++;
+    }catch(err){
+      ghLog("Failed: " + err.message, "bad");
+    }
+  }
+
+  ghLog("", "step");
+  ghLog(done + " of " + files.length + " file(s) are on the website now.", done === files.length ? "ok" : "bad");
+
+  button.disabled = false;
+};
+
+$("btnGhCheck").onclick = async () => {
+
+  const cfg = readSiteForm();
+  saveSiteConfig(cfg);
+  ghClear();
+
+  if (!siteReady(cfg)) return;
+
+  ghLog("Looking at what is on the website ...", "step");
+
+  // is the admin page sitting where anyone can open it?
+  const adminSha = await ghSha(cfg, "admin.html");
+
+  if (adminSha) {
+    ghLog("admin.html is PUBLIC. Anyone with the link can open your admin page.", "bad");
+    ghLog("It does not belong online - use the red button to take it off.", "bad");
+    $("btnGhRemoveAdmin").hidden = false;
+  } else {
+    ghLog("admin.html is not on the website. Good.", "ok");
+    $("btnGhRemoveAdmin").hidden = true;
+  }
+
+  // every photo the shop expects to find in its own folder
+  const wanted = new Set();
+
+  const collect = value => {
+    if (typeof value === "string" && /^[^:]+\.(jpg|jpeg|png|webp|gif|avif)$/i.test(value)) wanted.add(value);
+  };
+
+  (store.content.heroImages || []).forEach(collect);
+  collect(store.content.heroImage);
+  collect(store.content.storyImage);
+  (store.content.lookbook || []).forEach(look => collect(look.image));
+  store.categories.forEach(c => collect(c.image));
+  store.products.forEach(p => collect(p.image));
+
+  const missing = [];
+
+  for (const path of wanted){
+    const sha = await ghSha(cfg, path);
+    if (!sha) missing.push(path);
+  }
+
+  if (!wanted.size) {
+    ghLog("The shop uses no photos of its own - nothing to check.", "step");
+  } else if (missing.length) {
+    ghLog(missing.length + " of " + wanted.size + " photo(s) are missing from the website:", "bad");
+    missing.forEach(path => ghLog("   " + path, "bad"));
+  } else {
+    ghLog("All " + wanted.size + " photo(s) are on the website.", "ok");
+  }
+
+  // are the shop's own files even there?
+  let missingFiles = 0;
+
+  for (const name of SHOP_FILES){
+    const sha = await ghSha(cfg, name);
+    if (!sha) missingFiles++;
+    ghLog(name + (sha ? " is on the website." : " is MISSING from the website."), sha ? "ok" : "bad");
+  }
+
+  if (missingFiles || missing.length) {
+    ghLog("", "step");
+    ghLog("Fix all of this at once: go up to \"Put the whole website online\",", "bad");
+    ghLog("pick your \"Upload to web\" folder, and press the button.", "bad");
+  }
+
+  await ensurePages(cfg);
+};
+
+$("btnGhRemoveAdmin").onclick = async () => {
+
+  const cfg = readSiteForm();
+
+  if (!siteReady(cfg)) return;
+
+  if (!confirm(
+    "Take admin.html off the public website?\\n\\n" +
+    "Your copy on this computer is not touched - this only removes the one " +
+    "that strangers can open."
+  )) return;
+
+  ghClear();
+  ghLog("Removing admin.html from the website ...", "step");
+
+  const sha = await ghSha(cfg, "admin.html");
+
+  if (!sha) { ghLog("It is already gone.", "ok"); $("btnGhRemoveAdmin").hidden = true; return; }
+
+  const result = await gh(cfg, "/contents/admin.html", {
+    method: "DELETE",
+    body: JSON.stringify({
+      message: "Remove admin page from the public site",
+      sha: sha,
+      branch: cfg.branch
+    })
+  });
+
+  if (result.ok) {
+    ghLog("Removed. The public link stops working within a minute.", "ok");
+    $("btnGhRemoveAdmin").hidden = true;
+    toast("admin.html removed from the website");
+  } else {
+    ghLog("Could not remove it: " + ghReason(result), "bad");
+  }
+};
+
+
+/* ---------- accounts ----------
+   Passwords are hashed with PBKDF2-SHA256 and a random salt, so nothing
+   stored anywhere holds a readable password. That protects the password.
+   It does not protect the shop - see the note in the Users tab. */
+
+const PBKDF2_ROUNDS = 150000;
+
+function bytesToHex(bytes){
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function hexToBytes(hex){
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+  return out;
+}
+
+async function derive(password, saltBytes){
+
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+
+  const bits = await crypto.subtle.deriveBits(
+    { name:"PBKDF2", salt:saltBytes, iterations:PBKDF2_ROUNDS, hash:"SHA-256" },
+    key, 256);
+
+  return bytesToHex(new Uint8Array(bits));
+}
+
+async function makePassword(password){
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  return { salt: bytesToHex(salt), hash: await derive(password, salt) };
+}
+
+async function checkPassword(password, user){
+  return (await derive(password, hexToBytes(user.salt))) === user.hash;
+}
+
+/* A recovery code is the offline stand-in for a "reset link by email":
+   there is no server to email anything, so the person keeps the code.
+   16 characters from a 32-symbol alphabet = 80 bits, and the alphabet
+   leaves out 0/O/1/I so a handwritten code can still be read back. */
+
+const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+function makeRecoveryCode(){
+
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+
+  let out = "";
+
+  for (let i = 0; i < 16; i++){
+    out += CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length];
+    if (i % 4 === 3 && i < 15) out += "-";
+  }
+
+  return out;
+}
+
+function normaliseCode(value){
+  return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+async function attachRecoveryCode(user){
+  const code = makeRecoveryCode();
+  const credentials = await makePassword(normaliseCode(code));
+  user.recoverySalt = credentials.salt;
+  user.recoveryHash = credentials.hash;
+  return code;
+}
+
+async function checkRecoveryCode(code, user){
+  if (!user.recoveryHash) return false;
+  return (await derive(normaliseCode(code), hexToBytes(user.recoverySalt))) === user.recoveryHash;
+}
+
+/* showing the code */
+
+let pendingAfterRecovery = null;
+
+function showRecoveryCode(code, forWhom, afterwards){
+
+  $("recoveryFor").textContent = forWhom;
+  $("recoveryCode").textContent = code;
+  pendingAfterRecovery = afterwards || null;
+
+  $("recoveryDialog").showModal();
+}
+
+$("recoveryCopy").onclick = async () => {
+  const code = $("recoveryCode").textContent;
+  try{
+    await navigator.clipboard.writeText(code);
+    toast("Recovery code copied");
+  }catch(err){
+    const box = document.createElement("textarea");
+    box.value = code;
+    document.body.appendChild(box);
+    box.select();
+    try{ document.execCommand("copy"); toast("Recovery code copied"); }
+    catch(e){ toast("Could not copy - please write it down"); }
+    box.remove();
+  }
+};
+
+$("recoverySave").onclick = () => {
+  download(
+    "osama-admin-recovery-code.txt",
+    "Osama Garments admin - recovery code\n\n" +
+    "Account: " + $("recoveryFor").textContent + "\n" +
+    "Code:    " + $("recoveryCode").textContent + "\n\n" +
+    "Keep this somewhere safe. It resets the password if it is forgotten,\n" +
+    "and it cannot be looked up again.\n",
+    "text/plain"
+  );
+};
+
+$("recoveryDone").onclick = () => {
+  $("recoveryDialog").close();
+  $("recoveryCode").textContent = "";
+  const next = pendingAfterRecovery;
+  pendingAfterRecovery = null;
+  if (next) next();
+};
+
+function readUsers(){
+  try{ return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); }
+  catch(err){ return []; }
+}
+
+function writeUsers(users){
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function findUser(username){
+  const wanted = String(username || "").trim().toLowerCase();
+  return readUsers().find(u => u.username.toLowerCase() === wanted);
+}
+
+function can(permission){
+  return !!(session && ROLES[session.role] && ROLES[session.role][permission]);
+}
+
+function fail(id, message){
+  $(id).textContent = message;
+}
+
+
+/* ---------- sign in / out ---------- */
+
+function showForm(which){
+  $("setupForm").hidden   = which !== "setup";
+  $("loginForm").hidden   = which !== "login";
+  $("recoverForm").hidden = which !== "recover";
+}
+
+function showGate(){
+  const users = readUsers();
+  $("gate").style.display = "grid";
+  showForm(users.length ? "login" : "setup");
+  (users.length ? $("liUser") : $("suName")).focus();
+}
+
+$("forgotLink").onclick = () => {
+  $("rcError").textContent = "";
+  $("rcUser").value = $("liUser").value;
+  showForm("recover");
+  $("rcUser").focus();
+};
+
+$("backToLogin").onclick = () => {
+  $("liError").textContent = "";
+  showForm("login");
+  $("liUser").focus();
+};
+
+$("recoverForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const users = readUsers();
+  const user = users.find(u =>
+    u.username.toLowerCase() === $("rcUser").value.trim().toLowerCase());
+
+  const password = $("rcPass").value;
+
+  if (!user || !(await checkRecoveryCode($("rcCode").value, user))){
+    return fail("rcError", "That username and recovery code do not match.");
+  }
+
+  if (password.length < 8) return fail("rcError", "Use a password of 8 characters or more.");
+  if (password !== $("rcPass2").value) return fail("rcError", "The two passwords do not match.");
+
+  const credentials = await makePassword(password);
+  user.salt = credentials.salt;
+  user.hash = credentials.hash;
+
+  // the old code is spent - issue a fresh one
+  const code = await attachRecoveryCode(user);
+
+  writeUsers(users);
+
+  ["rcUser","rcCode","rcPass","rcPass2"].forEach(id => $(id).value = "");
+
+  showRecoveryCode(code, user.name, () => signIn(user));
+});
+
+$("setupForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const name = $("suName").value.trim();
+  const username = $("suUser").value.trim();
+  const password = $("suPass").value;
+
+  if (!name || !username) return fail("suError", "Fill in your name and a username.");
+  if (password.length < 8) return fail("suError", "Use a password of 8 characters or more.");
+  if (password !== $("suPass2").value) return fail("suError", "The two passwords do not match.");
+
+  const credentials = await makePassword(password);
+
+  const owner = {
+    id: Date.now(),
+    name, username, role: "Owner",
+    salt: credentials.salt, hash: credentials.hash,
+    createdAt: new Date().toISOString()
+  };
+
+  const code = await attachRecoveryCode(owner);
+
+  writeUsers([owner]);
+
+  $("suPass").value = $("suPass2").value = "";
+
+  showRecoveryCode(code, name, () => signIn(findUser(username)));
+});
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const user = findUser($("liUser").value);
+  const password = $("liPass").value;
+
+  // one message for both cases, so a wrong username can't be told from a wrong password
+  if (!user || !(await checkPassword(password, user))){
+    return fail("liError", "Wrong username or password.");
+  }
+
+  $("liPass").value = "";
+  signIn(user);
+});
+
+function signIn(user){
+  session = { username: user.username, name: user.name, role: user.role };
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  $("gate").style.display = "none";
+  applyRole();
+  start();
+}
+
+function signOut(){
+  sessionStorage.removeItem(SESSION_KEY);
+  session = null;
+  location.reload();
+}
+
+
+/* ---------- role gating ---------- */
+
+function applyRole(){
+
+  const role = ROLES[session.role] || ROLES.Staff;
+
+  $("whoami").innerHTML =
+    `Signed in as <b>${esc(session.name)}</b> &middot; <span class="role">${esc(role.label)}</span>`;
+
+  document.querySelectorAll("nav.tabs button").forEach(button => {
+    button.hidden = !role.tabs.includes(button.dataset.tab);
+  });
+
+  // land on a tab this person is actually allowed to open
+  const visible = document.querySelector("nav.tabs button:not([hidden])");
+  if (visible) visible.click();
+
+  $("btnPublish").hidden     = !can("publish");
+  $("btnBackup").hidden      = !can("backup");
+  $("btnRestore").hidden     = !can("backup");
+  $("btnAddProduct").hidden  = !can("editProducts");
+  $("btnAddCategory").hidden = !can("editCategories");
+  $("btnClearOrders").hidden = !can("manageOrders");
+}
+
+
+/* ---------- users tab ---------- */
+
+let editingUserId = null;
+
+function renderUsers(){
+
+  const users = readUsers();
+
+  $("usersWrap").innerHTML = `
+    <table>
+      <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Recovery code</th><th></th></tr></thead>
+      <tbody>
+        ${users.map(u => `
+          <tr>
+            <td><strong>${esc(u.name)}</strong>${
+              u.username === session.username ? ' <span class="muted">(you)</span>' : ""}</td>
+            <td>${esc(u.username)}</td>
+            <td><span class="pill">${esc(u.role)}</span></td>
+            <td class="nowrap">${u.recoveryHash
+              ? '<span class="muted">Set</span>'
+              : '<span style="color:var(--bad)">None &mdash; make one</span>'}</td>
+            <td class="right nowrap">
+              <button class="btn ghost small" data-uedit="${u.id}">Edit</button>
+              <button class="btn ghost small" data-ureset="${u.id}">Reset password</button>
+              <button class="btn ghost small" data-ucode="${u.id}">New recovery code</button>
+              <button class="btn danger small" data-udel="${u.id}"
+                ${u.username === session.username ? "disabled" : ""}>Delete</button>
+            </td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  $("usersWrap").querySelectorAll("[data-uedit]").forEach(b =>
+    b.onclick = () => openUser(Number(b.dataset.uedit), false));
+
+  $("usersWrap").querySelectorAll("[data-ureset]").forEach(b =>
+    b.onclick = () => openUser(Number(b.dataset.ureset), true));
+
+  $("usersWrap").querySelectorAll("[data-ucode]").forEach(b =>
+    b.onclick = () => regenerateCode(Number(b.dataset.ucode)));
+
+  $("usersWrap").querySelectorAll("[data-udel]").forEach(b =>
+    b.onclick = () => deleteUser(Number(b.dataset.udel)));
+}
+
+function openUser(id, resetOnly){
+
+  editingUserId = id;
+
+  const user = id == null ? null : readUsers().find(u => u.id === id);
+
+  $("userDialogTitle").textContent =
+    id == null ? "Add user" : (resetOnly ? "Reset password" : "Edit user");
+
+  $("fuName").value = user ? user.name : "";
+  $("fuUser").value = user ? user.username : "";
+  $("fuRole").value = user ? user.role : "Staff";
+  $("fuPass").value = "";
+  $("fuPass2").value = "";
+  $("fuError").textContent = "";
+
+  $("fuPassLabel").textContent = id == null ? "Password" : "New password";
+  $("fuPassHelp").textContent = id == null
+    ? "8 characters or more."
+    : "8 characters or more. Leave both boxes blank to keep the current password.";
+
+  $("userDialog").showModal();
+  (id == null ? $("fuName") : $("fuPass")).focus();
+}
+
+$("userForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const users = readUsers();
+  const name = $("fuName").value.trim();
+  const username = $("fuUser").value.trim();
+  const role = $("fuRole").value;
+  const password = $("fuPass").value;
+
+  if (!name || !username) return fail("fuError", "Fill in a name and a username.");
+
+  const clash = users.find(u =>
+    u.username.toLowerCase() === username.toLowerCase() && u.id !== editingUserId);
+
+  if (clash) return fail("fuError", "That username is already taken.");
+
+  if (editingUserId == null || password){
+    if (password.length < 8) return fail("fuError", "Use a password of 8 characters or more.");
+    if (password !== $("fuPass2").value) return fail("fuError", "The two passwords do not match.");
+  }
+
+  let issuedCode = null;
+  let issuedTo = name;
+
+  if (editingUserId == null){
+
+    const credentials = await makePassword(password);
+
+    const created = {
+      id: Date.now(), name, username, role,
+      salt: credentials.salt, hash: credentials.hash,
+      createdAt: new Date().toISOString()
+    };
+
+    issuedCode = await attachRecoveryCode(created);
+
+    users.push(created);
+
+    toast("User added");
+
+  } else {
+
+    const user = users.find(u => u.id === editingUserId);
+
+    // never leave the shop with no Owner
+    if (user.role === "Owner" && role !== "Owner" &&
+        users.filter(u => u.role === "Owner").length === 1){
+      return fail("fuError", "This is the only Owner. Make someone else an Owner first.");
+    }
+
+    user.name = name;
+    user.username = username;
+    user.role = role;
+
+    if (password){
+      const credentials = await makePassword(password);
+      user.salt = credentials.salt;
+      user.hash = credentials.hash;
+    }
+
+    if (session.username === $("fuUser").defaultValue || user.username === session.username){
+      session.name = user.name;
+      session.username = user.username;
+      session.role = user.role;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      applyRole();
+    }
+
+    toast("User saved");
+  }
+
+  writeUsers(users);
+  renderUsers();
+  $("userDialog").close();
+
+  if (issuedCode) showRecoveryCode(issuedCode, issuedTo);
+});
+
+async function regenerateCode(id){
+
+  const users = readUsers();
+  const user = users.find(u => u.id === id);
+
+  if (!confirm(
+    `Make a new recovery code for ${user.name}?\n\n` +
+    `Their old code stops working straight away.`)) return;
+
+  const code = await attachRecoveryCode(user);
+
+  writeUsers(users);
+  renderUsers();
+
+  showRecoveryCode(code, user.name);
+}
+
+function deleteUser(id){
+
+  const users = readUsers();
+  const user = users.find(u => u.id === id);
+
+  if (user.username === session.username){
+    alert("You cannot delete the account you are signed in with.");
+    return;
+  }
+
+  if (user.role === "Owner" && users.filter(u => u.role === "Owner").length === 1){
+    alert("This is the only Owner account. Make someone else an Owner first.");
+    return;
+  }
+
+  if (!confirm(`Remove ${user.name}'s access?`)) return;
+
+  writeUsers(users.filter(u => u.id !== id));
+  renderUsers();
+  toast("User removed");
+}
+
+
+/* ---------- change your own password ---------- */
+
+$("passwordForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const users = readUsers();
+  const user = users.find(u => u.username === session.username);
+
+  if (!(await checkPassword($("pwCurrent").value, user))){
+    return fail("pwError", "Your current password is not right.");
+  }
+
+  const next = $("pwNew").value;
+
+  if (next.length < 8) return fail("pwError", "Use a password of 8 characters or more.");
+  if (next !== $("pwNew2").value) return fail("pwError", "The two new passwords do not match.");
+
+  const credentials = await makePassword(next);
+  user.salt = credentials.salt;
+  user.hash = credentials.hash;
+
+  writeUsers(users);
+
+  $("passwordDialog").close();
+  ["pwCurrent","pwNew","pwNew2"].forEach(id => $(id).value = "");
+  toast("Password changed");
+});
+
+
+/* ---------- wiring ---------- */
+
+document.querySelectorAll("nav.tabs button").forEach(button => {
+  button.onclick = () => {
+    document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    button.classList.add("active");
+    $("panel-" + button.dataset.tab).classList.add("active");
+    if (button.dataset.tab === "orders") renderOrders();
+    if (button.dataset.tab === "users") renderUsers();
+    if (button.dataset.tab === "website") renderWebsite();
+  };
+});
+
+$("btnAddProduct").onclick = () => openProduct(null);
+$("btnAddCategory").onclick = () => openCategory(null);
+$("filterCategory").onchange = renderProductsTable;
+$("searchProducts").oninput = renderProductsTable;
+
+["fName","fPrice","fImage"].forEach(id =>
+  $(id).addEventListener("input", updateProductPreview));
+$("fCategory").addEventListener("change", updateProductPreview);
+
+["fCatName","fCatImage"].forEach(id =>
+  $(id).addEventListener("input", updateCategoryPreview));
+
+$("productDialogClose").onclick = $("productCancel").onclick =
+  () => $("productDialog").close();
+
+$("categoryDialogClose").onclick = $("categoryCancel").onclick =
+  () => $("categoryDialog").close();
+
+$("btnAddUser").onclick = () => openUser(null, false);
+$("userDialogClose").onclick = $("userCancel").onclick = () => $("userDialog").close();
+
+$("btnPassword").onclick = () => {
+  $("pwError").textContent = "";
+  $("passwordDialog").showModal();
+  $("pwCurrent").focus();
+};
+
+$("passwordDialogClose").onclick = $("passwordCancel").onclick =
+  () => $("passwordDialog").close();
+
+$("btnSignOut").onclick = () => {
+  if (!$("dirtyWarn").hidden &&
+      !confirm("You have unpublished changes. They stay saved on this computer. Sign out anyway?")) return;
+  signOut();
+};
+
+$("btnExportUsers").onclick = () => {
+  download("osama-admin-users.json", JSON.stringify(readUsers(), null, 2), "application/json");
+  toast("User list downloaded");
+};
+
+$("btnImportUsers").onclick = () => $("usersInput").click();
+
+$("usersInput").onchange = event => {
+
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try{
+      const list = JSON.parse(reader.result);
+
+      const valid = Array.isArray(list) && list.length &&
+        list.every(u => u.username && u.hash && u.salt && u.role && ROLES[u.role]);
+
+      if (!valid) throw new Error("not a user list");
+
+      if (!list.some(u => u.role === "Owner")){
+        alert("That file has no Owner account in it. Importing it would lock you out.");
+        return;
+      }
+
+      if (!confirm("Replace every account on this computer with the ones in this file?")) return;
+
+      writeUsers(list);
+      alert("Accounts imported. You will be signed out so you can sign in again.");
+      signOut();
+
+    }catch(err){
+      alert("That file could not be read as an admin user list.");
+    }
+  };
+
+  reader.readAsText(file);
+  event.target.value = "";
+};
+
+$("btnPublish").onclick = publish;
+
+$("btnPreview").onclick = () => window.open("index.html", "_blank");
+$("btnExportOrders").onclick = exportOrdersCsv;
+
+$("btnClearOrders").onclick = () => {
+  if (!confirm("Clear the order list in this browser?")) return;
+  writeOrders([]);
+  renderOrders();
+  toast("Order list cleared");
+};
+
+$("btnBackup").onclick = () => {
+  download(
+    "osama-garments-backup-" + new Date().toISOString().slice(0,10) + ".json",
+    JSON.stringify(store, null, 2),
+    "application/json"
+  );
+  toast("Backup downloaded");
+};
+
+$("btnRestore").onclick = () => $("restoreInput").click();
+
+$("restoreInput").onchange = event => {
+
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+
+      if (!data.products || !Array.isArray(data.products)){
+        throw new Error("not a store backup");
+      }
+
+      if (!confirm("Replace everything currently in the admin with this backup?")) return;
+
+      store = data;
+      store.categories = store.categories || [];
+      store.content = store.content || {};
+      store.contact = store.contact || {};
+      store.brand = store.brand || {};
+
+      save();
+      start(true);
+      toast("Backup restored");
+
+    }catch(err){
+      alert("That file could not be read as a store backup.");
+    }
+  };
+
+  reader.readAsText(file);
+  event.target.value = "";
+};
+
+window.addEventListener("beforeunload", e => {
+  if (!$("dirtyWarn").hidden){
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+$("revertBtn").addEventListener("click", revertDraft);
+
+
+/* ---------- start ---------- */
+
+function start(reloaded){
+
+  if (!reloaded) store = loadStore();
+
+  renderCategories();
+  renderProductsTable();
+
+  if (can("editContent")) renderContentFields();
+  if (can("editContact")) renderContact();
+
+  renderOrders();
+
+  if (can("manageUsers")) renderUsers();
+  if (can("manageSite")) renderWebsite();
+}
+
+
+/* ---------- boot ---------- */
+
+try{
+  const saved = sessionStorage.getItem(SESSION_KEY);
+
+  if (saved){
+
+    const candidate = JSON.parse(saved);
+    const user = findUser(candidate.username);
+
+    // the account must still exist, with the same role it had when signing in
+    if (user && user.role === candidate.role){
+      session = { username:user.username, name:user.name, role:user.role };
+      $("gate").style.display = "none";
+      applyRole();
+      start();
+    } else {
+      sessionStorage.removeItem(SESSION_KEY);
+      showGate();
+    }
+
+  } else {
+    showGate();
+  }
+
+}catch(err){
+  showGate();
+}
+
+</script>
+
+</body>
+</html>
